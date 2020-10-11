@@ -23,8 +23,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+
+import kr.co.softcampus.tooksampoom.Utils.LimitedQueue;
+import kr.co.softcampus.tooksampoom.Utils.TestType;
 
 
 public class PushUpMeasureActivity extends AppCompatActivity {
@@ -33,12 +37,17 @@ public class PushUpMeasureActivity extends AppCompatActivity {
     PreviewView previewView;
     ImageView pushUpBodyImageView;
     Interpreter pushUpInterpreter;
+    public static List<Integer> LatestPostures = new LimitedQueue<>(10);
     public static String[] pushUpStatus = new String[]{"stand", "move", "down", "fail"};
+    public static boolean DownHit;
+    public static int Count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_push_up_measure);
+        Count = 0;
+        DownHit = false;
         previewView = findViewById(R.id.previewView);
         pushUpBodyImageView = findViewById(R.id.push_up_body);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -80,7 +89,7 @@ public class PushUpMeasureActivity extends AppCompatActivity {
 
         preview.setSurfaceProvider(previewView.createSurfaceProvider());
         ImageAnalysis analysis = LiveVideoAnalyzer.getImageAnalysis(Executors.newSingleThreadExecutor(),
-                pushUpBodyImageView, pushUpInterpreter, "pushUpCount");
+                pushUpBodyImageView, pushUpInterpreter, "pushUpCount", TestType.PushUp);
         cameraProvider.bindToLifecycle(this, cameraSelector, analysis, preview);
     }
 
@@ -107,6 +116,24 @@ public class PushUpMeasureActivity extends AppCompatActivity {
         for (float prob : probList)
             input.putFloat(prob);
         return input;
+    }
+
+    public static int getCurrentPosture() {
+        int sum = 0;
+        for (int i : LatestPostures)
+            sum += i;
+        return Math.round((float) sum / LatestPostures.size());
+    }
+
+    public static void updateCounter() {
+        int currentPosture = getCurrentPosture();
+        if (currentPosture == 0) {
+            if (DownHit)
+                Count ++;
+            DownHit = false;
+        }
+        if (currentPosture == 2)
+            DownHit = true;
     }
 
 }

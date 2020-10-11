@@ -50,8 +50,8 @@ public class TSPdrawTools {
         _countPaint.setAntiAlias(true);
         _countPaint.setStyle(Paint.Style.STROKE);
         _countPaint.setColor(Color.BLUE);
-        _countPaint.setStrokeWidth(10f);
-        _countPaint.setTextSize(100f);
+        _countPaint.setStrokeWidth(6f);
+        _countPaint.setTextSize(170f);
         return _countPaint;
     }
 
@@ -72,10 +72,10 @@ public class TSPdrawTools {
         }
     }
 
-    public static void createCountOverlay(Bitmap overlay, String type, int count) {
+    public static void createCountOverlay(Bitmap overlay, String type, int count, int currentPosture) {
         Paint paint = getCountPaint();
         Canvas canvas = new Canvas(overlay);
-        canvas.drawText(type + ": " + count,overlay.getWidth() * 0.3f,
+        canvas.drawText(type + ": " + count + "TYPE = " + currentPosture,overlay.getWidth() * 0.3f,
                 overlay.getHeight() * 0.8f, paint);
     }
 }

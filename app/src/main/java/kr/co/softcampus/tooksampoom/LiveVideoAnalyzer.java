@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import kr.co.softcampus.tooksampoom.Utils.TSPdrawTools;
+import kr.co.softcampus.tooksampoom.Utils.TestType;
 
 public class LiveVideoAnalyzer {
 
@@ -37,7 +38,8 @@ public class LiveVideoAnalyzer {
                     .build()
     );
 
-    public static ImageAnalysis getImageAnalysis(Executor executor, ImageView imageView, Interpreter interpreter, String type) {
+    public static ImageAnalysis getImageAnalysis(Executor executor, ImageView imageView,
+                                                 Interpreter interpreter, String type, TestType testType) {
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder()
                         .setTargetResolution(new Size(1280, 720))
@@ -56,7 +58,6 @@ public class LiveVideoAnalyzer {
                             ByteBuffer output = ByteBuffer.allocateDirect(java.lang.Float.SIZE * 4 / java.lang.Byte.SIZE).order(ByteOrder.nativeOrder());
                             interpreter.run(input, output);
                             output.rewind();
-                            float[] result = new float[4];
                             float max = 0;
                             int maxInd = 0;
                             for (int i = 0; i < 4; i++) {
@@ -66,7 +67,12 @@ public class LiveVideoAnalyzer {
                                     maxInd = i;
                                 }
                             }
-                            TSPdrawTools.createCountOverlay(overlay, type, maxInd);
+                            if (testType == TestType.PushUp) {
+                                PushUpMeasureActivity.LatestPostures.add(maxInd);
+                                PushUpMeasureActivity.updateCounter();
+                            }
+                            TSPdrawTools.createCountOverlay(overlay, type, PushUpMeasureActivity.Count,
+                                    maxInd);
                         }
                         imageView.setImageBitmap(overlay);
                         image.close();
